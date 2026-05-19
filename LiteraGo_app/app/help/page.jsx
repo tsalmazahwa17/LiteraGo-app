@@ -95,7 +95,6 @@ export default function HelpPage() {
           <p>Butuh bantuan langsung? Pilih salah satu kontak berikut.</p>
           <div className="contact-stack" style={{ marginTop: 18 }}>
             <button className="primary-btn" onClick={() => contact("Chat Sekarang")}>Chat Sekarang</button>
-            <button className="secondary-btn" onClick={() => contact("Telepon")}>Telepon</button>
             <button className="secondary-btn" onClick={() => contact("Email")}>Email</button>
           </div>
         </aside>
