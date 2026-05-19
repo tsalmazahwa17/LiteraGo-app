@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import PageShell from "@/components/PageShell";
 import Toast from "@/components/Toast";
 import { clearAuthCookie } from "@/lib/auth-cookie";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
@@ -216,7 +215,9 @@ export default function AdminDashboardPage() {
       ["Lunas", "Diproses", "Siap Diambil", "Dipinjam"].includes(item.status)
     ).length;
 
-    const finishedOrders = orders.filter((item) => item.status === "Selesai").length;
+    const finishedOrders = orders.filter(
+      (item) => item.status === "Selesai"
+    ).length;
 
     const revenue = orders.reduce(
       (total, item) => total + Number(item.total || item.price || 0),
@@ -314,17 +315,17 @@ export default function AdminDashboardPage() {
 
   if (loading) {
     return (
-      <PageShell>
+      <main className="page-shell admin-shell">
         <div className="admin-loading-card">
           <h1>Memuat Admin Panel...</h1>
           <p>Mengambil pesanan, stok, user, dan pembayaran dari Supabase.</p>
         </div>
-      </PageShell>
+      </main>
     );
   }
 
   return (
-    <PageShell>
+    <main className="page-shell admin-shell">
       <section className="admin-hero">
         <div>
           <span className="kicker">LiteraGo Admin</span>
@@ -332,8 +333,8 @@ export default function AdminDashboardPage() {
             Monitoring <span>Peminjaman</span>
           </h1>
           <p className="section-lead">
-            Panel admin untuk memantau pesanan user, status peminjaman, stok buku,
-            dan akun yang terdaftar.
+            Panel admin untuk memantau pesanan user, status peminjaman, stok
+            buku, dan akun yang terdaftar.
           </p>
         </div>
 
@@ -488,7 +489,9 @@ export default function AdminDashboardPage() {
                       <div>
                         <span className="field-label">Buku</span>
                         <p>
-                          <strong>{order.books?.title || order.book_id || "-"}</strong>
+                          <strong>
+                            {order.books?.title || order.book_id || "-"}
+                          </strong>
                           <br />
                           {order.books?.author || "-"}
                         </p>
@@ -497,9 +500,11 @@ export default function AdminDashboardPage() {
                       <div>
                         <span className="field-label">Jadwal</span>
                         <p>
-                          Ambil: {shortDate(order.pickup_date || order.borrowed_at)}
+                          Ambil:{" "}
+                          {shortDate(order.pickup_date || order.borrowed_at)}
                           <br />
-                          Kembali: {shortDate(order.return_date || order.due_at)}
+                          Kembali:{" "}
+                          {shortDate(order.return_date || order.due_at)}
                           <br />
                           Total: {formatRupiah(order.total || order.price || 0)}
                         </p>
@@ -516,7 +521,9 @@ export default function AdminDashboardPage() {
 
                       <button
                         className="ghost-btn small"
-                        onClick={() => updateOrderStatus(order.id, "Siap Diambil")}
+                        onClick={() =>
+                          updateOrderStatus(order.id, "Siap Diambil")
+                        }
                       >
                         Tandai Siap Diambil
                       </button>
@@ -558,40 +565,56 @@ export default function AdminDashboardPage() {
               </thead>
 
               <tbody>
-                {stocks.map((item) => {
-                  const currentStock =
-                    item.stock_available ?? item.stock ?? item.available_stock ?? 0;
+                {stocks.length === 0 ? (
+                  <tr>
+                    <td colSpan="5">
+                      <div className="admin-empty">
+                        <h3>Belum ada data stok</h3>
+                        <p>Data stok akan muncul dari tabel library_books.</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  stocks.map((item) => {
+                    const currentStock =
+                      item.stock_available ??
+                      item.stock ??
+                      item.available_stock ??
+                      0;
 
-                  return (
-                    <tr key={item.id}>
-                      <td>
-                        <strong>{item.books?.title || item.book_id}</strong>
-                        <br />
-                        <span>{item.books?.author || "-"}</span>
-                      </td>
+                    return (
+                      <tr key={item.id}>
+                        <td>
+                          <strong>{item.books?.title || item.book_id}</strong>
+                          <br />
+                          <span>{item.books?.author || "-"}</span>
+                        </td>
 
-                      <td>
-                        {item.libraries?.name || item.library_id}
-                        <br />
-                        <span>{item.libraries?.city || "-"}</span>
-                      </td>
+                        <td>
+                          {item.libraries?.name || item.library_id}
+                          <br />
+                          <span>{item.libraries?.city || "-"}</span>
+                        </td>
 
-                      <td>{item.books?.category || "-"}</td>
+                        <td>{item.books?.category || "-"}</td>
 
-                      <td>
-                        <input
-                          className="input admin-stock-input"
-                          type="number"
-                          min="0"
-                          defaultValue={currentStock}
-                          onBlur={(event) => updateStock(item, event.target.value)}
-                        />
-                      </td>
+                        <td>
+                          <input
+                            className="input admin-stock-input"
+                            type="number"
+                            min="0"
+                            defaultValue={currentStock}
+                            onBlur={(event) =>
+                              updateStock(item, event.target.value)
+                            }
+                          />
+                        </td>
 
-                      <td>{shortDate(item.updated_at)}</td>
-                    </tr>
-                  );
-                })}
+                        <td>{shortDate(item.updated_at)}</td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
@@ -620,30 +643,41 @@ export default function AdminDashboardPage() {
               </thead>
 
               <tbody>
-                {users.map((user) => (
-                  <tr key={user.id}>
-                    <td>
-                      <strong>{user.name || user.username || "User"}</strong>
-                      <br />
-                      <span>{user.username || "-"}</span>
+                {users.length === 0 ? (
+                  <tr>
+                    <td colSpan="5">
+                      <div className="admin-empty">
+                        <h3>Belum ada user</h3>
+                        <p>Data user akan muncul dari tabel profiles.</p>
+                      </div>
                     </td>
-
-                    <td>{user.email || "-"}</td>
-                    <td>{user.phone || "-"}</td>
-
-                    <td>
-                      <span
-                        className={`admin-role-pill ${
-                          user.role === "admin" ? "admin" : ""
-                        }`}
-                      >
-                        {user.role || "user"}
-                      </span>
-                    </td>
-
-                    <td>{shortDate(user.created_at)}</td>
                   </tr>
-                ))}
+                ) : (
+                  users.map((user) => (
+                    <tr key={user.id}>
+                      <td>
+                        <strong>{user.name || user.username || "User"}</strong>
+                        <br />
+                        <span>{user.username || "-"}</span>
+                      </td>
+
+                      <td>{user.email || "-"}</td>
+                      <td>{user.phone || "-"}</td>
+
+                      <td>
+                        <span
+                          className={`admin-role-pill ${
+                            user.role === "admin" ? "admin" : ""
+                          }`}
+                        >
+                          {user.role || "user"}
+                        </span>
+                      </td>
+
+                      <td>{shortDate(user.created_at)}</td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -654,6 +688,6 @@ export default function AdminDashboardPage() {
         message={toast}
         type={toast.includes("Gagal") ? "error" : "success"}
       />
-    </PageShell>
+    </main>
   );
 }
