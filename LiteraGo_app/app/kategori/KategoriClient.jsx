@@ -162,7 +162,6 @@ export default function CategoryPage() {
       <section>
         <div className="section-header">
           <h2>Kategori Item</h2>
-          <button className="chip-btn" onClick={resetAllFilters}>Lihat Semua</button>
         </div>
         <div className="filter-bar">
           <button
